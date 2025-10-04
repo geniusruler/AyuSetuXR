@@ -19,7 +19,7 @@
 | Cyan | `#06B6D4` Neon Cyan | `#0891B2` Deep Cyan | Secondary accents |
 | Violet | `#8B5CF6` Vibrant Violet | `#7C3AED` Deep Violet | Highlights, badges |
 | Green | `#10B981` Emerald | `#059669` Forest Green | Success states |
-| Orange | `#F97316` Bright Orange | `#EA580C` Deep Orange | Warnings, streaks |
+| Orange | `#F97316` Bright Orange | `#EA580C` Deep Orange | Warnings |
 | Red | `#EF4444` Bright Red | `#DC2626` Deep Red | Errors, alerts |
 
 ### Text Colors
@@ -135,7 +135,7 @@
 **Dark Mode Features:**
 - Deep navy background (#0B0F19)
 - Glowing welcome text with cyan shadow
-- Neon accent badges (orange for streak)
+ 
 - High-contrast metric cards
 - Vibrant chart colors
 - Floating particle effects

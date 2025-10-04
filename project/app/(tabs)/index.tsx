@@ -35,11 +35,7 @@ export default function DashboardScreen() {
             <Text style={[styles.greeting, { color: colors.text.secondary }]}>Welcome back,</Text>
             <Text style={[styles.username, { color: colors.text.primary, textShadowColor: colors.gradient.cyan }]}>Priya</Text>
           </View>
-          <View style={[styles.streakBadge, { backgroundColor: colors.background.card, borderColor: `${colors.gradient.orange}40` }]}>
-            <View style={[styles.streakGlow, { backgroundColor: `${colors.gradient.orange}20` }]} />
-            <Zap size={20} color={colors.gradient.orange} fill={colors.gradient.orange} />
-            <Text style={[styles.streakText, { color: colors.text.primary }]}>7 day streak</Text>
-          </View>
+            {/* streak badge eliminado */}
         </View>
 
         <GradientCard style={styles.summaryCard} delay={100} glowColor={colors.gradient.cyan}>
@@ -138,27 +134,7 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
   },
-  streakBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.xl,
-    borderWidth: 1,
-  },
-  streakGlow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: BorderRadius.xl,
-  },
-  streakText: {
-    fontSize: Typography.fontSize.sm,
-    fontFamily: Typography.fontFamily.semiBold,
-    marginLeft: Spacing.xs,
-  },
+  // streak styles eliminados
   summaryCard: {
     marginBottom: Spacing.lg,
   },

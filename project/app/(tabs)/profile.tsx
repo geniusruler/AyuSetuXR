@@ -44,7 +44,7 @@ export default function ProfileScreen() {
             <View style={[styles.statDivider, { backgroundColor: colors.border.light }]} />
             <View style={styles.stat}>
               <Text style={[styles.statValue, { color: colors.text.primary }]}>7</Text>
-              <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Day Streak</Text>
+              {/* streak eliminado */}
             </View>
             <View style={[styles.statDivider, { backgroundColor: colors.border.light }]} />
             <View style={styles.stat}>

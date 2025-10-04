@@ -113,7 +113,7 @@ export default function ResultsScreen() {
           </View>
           <View style={styles.highlight}>
             <CheckCircle size={18} color={Colors.gradient.green} />
-            <Text style={styles.highlightText}>Maintained focus for 8 min streak</Text>
+            <Text style={styles.highlightText}>Maintained focus for 8 min</Text>
           </View>
         </GradientCard>
 

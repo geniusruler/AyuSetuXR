@@ -1,0 +1,33 @@
+# Node modules
+node_modules/
+
+# Archivos de entorno
+.env
+.env.*
+
+# Archivos generados por Expo
+expo-env.d.ts
+
+# Archivos de compilación y distribución
+build/
+dist/
+
+# Mapas de código fuente
+*.js.map
+
+# Archivos generados por TypeScript
+*.tsbuildinfo
+
+# Logs
+*.log
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Otros
+.idea/
+.vscode/
+
+# Ignorar migraciones si no quieres subirlas
+supabase/migrations/

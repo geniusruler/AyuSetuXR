@@ -1,16 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import { FaceMesh } from '@mediapipe/face_mesh';
+import { useCameraPermissions } from '../hooks/useCameraPermissions';
 
-export default function CameraFaceMesh() {
+
+export default function CameraFaceMesh({ onLandmarksDetected, width, height }) {
   const devices = useCameraDevices();
   const device = devices.front;
-  const [landmarks, setLandmarks] = useState([]);
+  const { permission, requestPermission } = useCameraPermissions();
+  const faceMeshRef = useRef(null);
 
   useEffect(() => {
-    const init = async () => {
-      await Camera.requestCameraPermission();
+    if (permission?.status !== 'authorized') {
+      requestPermission();
+      return;
+    }
+    if (!faceMeshRef.current) {
       const faceMesh = new FaceMesh({
         locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`,
       });
@@ -20,35 +27,45 @@ export default function CameraFaceMesh() {
         minDetectionConfidence: 0.5,
         minTrackingConfidence: 0.5,
       });
-      faceMesh.onResults((r) => {
-        if (r.multiFaceLandmarks) setLandmarks(r.multiFaceLandmarks[0]);
+      faceMesh.onResults((results) => {
+        if (results.multiFaceLandmarks) {
+          const landmarks = results.multiFaceLandmarks[0];
+          onLandmarksDetected?.(landmarks);
+        }
       });
-    };
-    init();
-  }, []);
+      faceMeshRef.current = faceMesh;
+    }
+  }, [permission, requestPermission, onLandmarksDetected]);
+
+  if (permission?.status === 'not-determined' || permission?.status === 'pending') {
+    return (
+      <View style={[styles.container, width && height ? { width, height } : null]}>
+        <ActivityIndicator size="large" color="#fff" />
+        <Text style={styles.text}>Solicitando permiso de cámara...</Text>
+      </View>
+    );
+  }
+
+  if (permission?.status !== 'authorized') {
+    return (
+      <View style={[styles.container, width && height ? { width, height } : null]}>
+        <Text style={styles.text}>Permiso de cámara denegado. Actívalo en la configuración.</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      {device && <Camera style={StyleSheet.absoluteFill} device={device} isActive />}
-      <View style={styles.overlay}>
-        <Text style={styles.text}>Landmarks: {landmarks.length}</Text>
-      </View>
+    <View style={[styles.container, width && height ? { width, height } : null]}>
+      {device ? (
+        <Camera style={[StyleSheet.absoluteFill, width && height ? { width, height } : null]} device={device} isActive />
+      ) : (
+        <ActivityIndicator size="large" color="#fff" />
+      )}
     </View>
   );
 }
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
-  overlay: { position: 'absolute', top: 40, left: 20, backgroundColor: 'rgba(0,0,0,0.6)', padding: 10, borderRadius: 8 },
-  text: { color: '#fff' },
-});
 
-// CameraFaceMesh.js
-export default function CameraFaceMesh({ onLandmarksDetected }) {
- 
-  faceMesh.onResults((results) => {
-    if (results.multiFaceLandmarks) {
-      const landmarks = results.multiFaceLandmarks[0];
-      onLandmarksDetected?.(landmarks); // pass up to parent
-    }
-  });
-}
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
+  text: { color: '#fff', textAlign: 'center', marginTop: 16 },
+});

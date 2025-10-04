@@ -10,7 +10,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { X, Target } from 'lucide-react-native';
-import CameraPlaceholder from '@/components/CameraPlaceholder';
+import CameraFaceMesh from '@/components/CameraFaceMesh';
 import { Colors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { SCREEN_PADDING, SCREEN_WIDTH } from '@/constants/dimensions';
 
@@ -106,7 +106,7 @@ export default function CalibrationScreen() {
       </View>
 
       <View style={styles.cameraContainer}>
-        <CameraPlaceholder
+        <CameraFaceMesh
           width={SCREEN_WIDTH - (SCREEN_PADDING * 2)}
           height={400}
         />

@@ -4,6 +4,7 @@ import CameraFaceMesh from './CameraFaceMesh';
 import MetricsOverlay from './MetricsOverlay';
 import { computeMetrics } from '../utils/computeMetrics';
 import { Audio } from 'expo-av';
+import Constants from 'expo-constants';
 
 export default function XRScreen() {
   const [metrics, setMetrics] = useState<any>(null);
@@ -18,11 +19,19 @@ export default function XRScreen() {
   const sendMetricsToAI = useCallback(async (metrics: any) => {
     if (!metrics) return;
     try {
-      const res = await fetch('https://<your-worker-name>.workers.dev', {
+      // ✅ FIXED: properly define the worker URL
+      const workerUrl = Constants.expoConfig?.extra?.CLOUDFLARE_WORKER_URL;
+
+      const res = await fetch(workerUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ metrics }),
       });
+
+      if (!res.ok) {
+        console.error('Worker error:', await res.text());
+        return;
+      }
 
       // 🔹 Convert the MP3 stream into playable audio
       const arrayBuffer = await res.arrayBuffer();

@@ -54,7 +54,7 @@ export const LightColors = {
   },
   text: {
     primary: '#111827',
-    secondary: '#374151',
+    secondary: '#4B5563', // más suave para mejor contraste
     tertiary: '#6B7280',
     muted: '#9CA3AF',
   },

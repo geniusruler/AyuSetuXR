@@ -10,7 +10,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors, BorderRadius, Shadows, Spacing } from '@/constants/theme';
+import { getThemedColors, BorderRadius, Shadows, Spacing } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface GradientCardProps {
   children: React.ReactNode;
@@ -19,12 +20,11 @@ interface GradientCardProps {
   glowColor?: string;
 }
 
-export default function GradientCard({
-  children,
-  style,
-  delay = 0,
-  glowColor = Colors.gradient.blue
-}: GradientCardProps) {
+export default function GradientCard(props: GradientCardProps) {
+  const { children, style, delay = 0, glowColor } = props;
+  const { isDark } = useTheme();
+  const colors = getThemedColors(isDark);
+  const effectiveGlowColor = glowColor || colors.gradient.blue;
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(20);
   const glowOpacity = useSharedValue(0.3);
@@ -74,14 +74,14 @@ export default function GradientCard({
           styles.glowBorder,
           glowStyle,
           {
-            shadowColor: glowColor,
-            borderColor: `${glowColor}40`,
+            shadowColor: effectiveGlowColor,
+            borderColor: `${effectiveGlowColor}40`,
           }
         ]}
       />
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: colors.background.card, ...Shadows.medium }] }>
         <LinearGradient
-          colors={[`${glowColor}08`, 'transparent']}
+          colors={[`${effectiveGlowColor}08`, 'transparent']}
           style={styles.gradientOverlay}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -110,11 +110,9 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   card: {
-    backgroundColor: Colors.background.card,
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
     overflow: 'hidden',
-    ...Shadows.medium,
   },
   gradientOverlay: {
     position: 'absolute',

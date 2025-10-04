@@ -8,7 +8,8 @@ import Animated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
-import { Colors, Typography, BorderRadius, Shadows, Spacing } from '@/constants/theme';
+import { getThemedColors, Typography, BorderRadius, Shadows, Spacing } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 import { METRIC_CARD_HEIGHT } from '@/constants/dimensions';
 
 interface MetricCardProps {
@@ -25,17 +26,20 @@ interface MetricCardProps {
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
-export default function MetricCard({
+const MetricCard: React.FC<MetricCardProps> = ({
   title,
   value,
   unit,
   icon,
-  gradientColors = [Colors.gradient.blue, Colors.gradient.cyan],
+  gradientColors,
   style,
   showGradientBar = false,
   percentage,
   delay = 0,
-}: MetricCardProps) {
+}) => {
+  const { isDark } = useTheme();
+  const colors = getThemedColors(isDark);
+  const usedGradientColors = gradientColors || [colors.gradient.blue, colors.gradient.cyan];
   const opacity = useSharedValue(0);
   const scale = useSharedValue(0.9);
   const barWidth = useSharedValue(0);
@@ -91,14 +95,14 @@ export default function MetricCard({
           styles.glowBorder,
           glowStyle,
           {
-            shadowColor: gradientColors[0],
-            borderColor: `${gradientColors[0]}30`,
+            shadowColor: usedGradientColors[0],
+            borderColor: `${usedGradientColors[0]}30`,
           }
         ]}
       />
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: colors.background.card }] }>
         <LinearGradient
-          colors={[`${gradientColors[0]}10`, 'transparent']}
+          colors={[`${usedGradientColors[0]}10`, 'transparent']}
           style={styles.gradientOverlay}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -106,17 +110,17 @@ export default function MetricCard({
         <View style={styles.content}>
           <View style={styles.header}>
             {icon && <View style={styles.iconContainer}>{icon}</View>}
-            <Text style={styles.title}>{title}</Text>
+            <Text style={[styles.title, { color: colors.text.secondary }]}>{title}</Text>
           </View>
           <View style={styles.valueContainer}>
-            <Text style={[styles.value, { color: gradientColors[0] }]}>{value}</Text>
-            {unit && <Text style={styles.unit}>{unit}</Text>}
+            <Text style={[styles.value, { color: usedGradientColors[0] }]}>{value}</Text>
+            {unit && <Text style={[styles.unit, { color: colors.text.secondary }]}>{unit}</Text>}
           </View>
-          {showGradientBar && gradientColors && gradientColors.length >= 2 && percentage !== undefined && (
+          {showGradientBar && usedGradientColors && usedGradientColors.length >= 2 && percentage !== undefined && (
             <View style={styles.barContainer}>
-              <View style={styles.barBackground}>
+              <View style={[styles.barBackground, { backgroundColor: colors.background.secondary }] }>
                 <AnimatedLinearGradient
-                  colors={gradientColors as [string, string, ...string[]]}
+                  colors={usedGradientColors as [string, string, ...string[]]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={[styles.barFill, barStyle]}
@@ -128,7 +132,9 @@ export default function MetricCard({
       </View>
     </Animated.View>
   );
-}
+};
+
+export default MetricCard;
 
 const styles = StyleSheet.create({
   container: {
@@ -148,7 +154,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   card: {
-    backgroundColor: Colors.background.card,
+    // backgroundColor: Colors.background.card, // ahora dinámico
     borderRadius: BorderRadius.xl,
     minHeight: METRIC_CARD_HEIGHT,
     overflow: 'hidden',
@@ -175,7 +181,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: Typography.fontSize.sm,
     fontFamily: Typography.fontFamily.medium,
-    color: Colors.text.secondary,
+    // color: Colors.text.secondary, // ahora dinámico
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
@@ -189,11 +195,12 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 180, 216, 0.5)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
+    // color: dinámico
   },
   unit: {
     fontSize: Typography.fontSize.base,
     fontFamily: Typography.fontFamily.regular,
-    color: Colors.text.secondary,
+    // color: Colors.text.secondary, // ahora dinámico
     marginLeft: Spacing.xs,
   },
   barContainer: {
@@ -201,7 +208,7 @@ const styles = StyleSheet.create({
   },
   barBackground: {
     height: 8,
-    backgroundColor: Colors.background.secondary,
+    // backgroundColor: Colors.background.secondary, // ahora dinámico
     borderRadius: BorderRadius.md,
     overflow: 'hidden',
   },

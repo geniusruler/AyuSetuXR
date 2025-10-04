@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, StyleSheet, ViewStyle } from 'react-native';
-import { Colors, Typography, BorderRadius, Spacing } from '@/constants/theme';
+import { getThemedColors, Typography, BorderRadius, Spacing } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 import { INPUT_HEIGHT } from '@/constants/dimensions';
+
 
 interface CustomTextInputProps {
   label: string;
@@ -18,20 +20,22 @@ interface CustomTextInputProps {
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
 }
 
-export default function CustomTextInput({
+const CustomTextInput: React.FC<CustomTextInputProps> = ({
   label,
   value,
   onChangeText,
   onBlur,
   placeholder,
-  secureTextEntry = false,
+  secureTextEntry,
   keyboardType = 'default',
   style,
   icon,
   error,
   success = false,
   autoCapitalize = 'sentences',
-}: CustomTextInputProps) {
+}) => {
+  const { isDark } = useTheme();
+  const colors = getThemedColors(isDark);
   const [isFocused, setIsFocused] = useState(false);
 
   const handleBlur = () => {
@@ -42,33 +46,35 @@ export default function CustomTextInput({
   };
 
   const getBorderColor = () => {
-    if (error) return Colors.gradient.red;
-    if (success) return Colors.gradient.green;
-    if (isFocused) return Colors.gradient.blue;
-    return Colors.border.light;
+    if (error) return colors.gradient.red;
+    if (success) return colors.gradient.green;
+    if (isFocused) return colors.gradient.blue;
+    return colors.border.light;
   };
 
   return (
     <View style={[styles.container, style]}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={[styles.inputContainer, { borderColor: getBorderColor() }]}>
+      <Text style={[styles.label, { color: colors.text.secondary }]}>{label}</Text>
+      <View style={[styles.inputContainer, { borderColor: getBorderColor(), backgroundColor: colors.background.secondary }] }>
         {icon && <View style={styles.iconContainer}>{icon}</View>}
         <TextInput
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={Colors.text.muted}
+          placeholderTextColor={colors.text.muted}
           secureTextEntry={secureTextEntry}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
           onFocus={() => setIsFocused(true)}
           onBlur={handleBlur}
-          style={[styles.input, icon ? styles.inputWithIcon : undefined]}
+          style={[styles.input, { color: colors.text.primary }, icon ? styles.inputWithIcon : undefined]}
         />
       </View>
     </View>
   );
-}
+};
+
+export default CustomTextInput;
 
 const styles = StyleSheet.create({
   container: {
@@ -77,22 +83,22 @@ const styles = StyleSheet.create({
   label: {
     fontSize: Typography.fontSize.sm,
     fontFamily: Typography.fontFamily.medium,
-    color: Colors.text.secondary,
+    // color: Colors.text.secondary, // Se usa dinámicamente
     marginBottom: Spacing.xs,
   },
   inputContainer: {
     height: INPUT_HEIGHT,
-    backgroundColor: Colors.background.secondary,
+    // backgroundColor: Colors.background.secondary, // Se usa dinámicamente
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: Colors.border.light,
+    // borderColor: Colors.border.light, // Se usa dinámicamente
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
   },
-  inputContainerFocused: {
-    borderColor: Colors.gradient.blue,
-  },
+  // inputContainerFocused: {
+  //   borderColor: Colors.gradient.blue,
+  // },
   iconContainer: {
     marginRight: Spacing.sm,
   },
@@ -100,7 +106,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: Typography.fontSize.base,
     fontFamily: Typography.fontFamily.regular,
-    color: Colors.text.primary,
+    // color: Colors.text.primary, // Se usa dinámicamente
   },
   inputWithIcon: {
     marginLeft: Spacing.xs,

@@ -8,7 +8,8 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { Colors, Typography, BorderRadius, Shadows, Spacing } from '@/constants/theme';
+import { getThemedColors, Typography, BorderRadius, Shadows, Spacing } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 import { BUTTON_HEIGHT } from '@/constants/dimensions';
 
 interface CustomButtonProps {
@@ -22,14 +23,17 @@ interface CustomButtonProps {
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
-export default function CustomButton({
+
+const CustomButton: React.FC<CustomButtonProps> = ({
   title,
   onPress,
   variant = 'primary',
   style,
   textStyle,
   disabled = false
-}: CustomButtonProps) {
+}) => {
+  const { isDark } = useTheme();
+  const colors = getThemedColors(isDark);
   const scale = useSharedValue(1);
   const glowOpacity = useSharedValue(0.6);
 
@@ -71,22 +75,22 @@ export default function CustomButton({
 
   if (variant === 'primary') {
     return (
-      <Animated.View style={[styles.glowContainer, glowStyle]}>
+      <Animated.View style={[styles.glowContainer, glowStyle, { ...Shadows.glow, borderRadius: BorderRadius.lg }] }>
         <AnimatedTouchable
           onPress={handlePress}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           disabled={disabled}
           activeOpacity={0.8}
-          style={[styles.button, styles.primaryButton, animatedStyle, style]}
+          style={[styles.button, { borderWidth: 1, borderColor: `${colors.gradient.cyan}40` }, animatedStyle, style]}
         >
           <LinearGradient
-            colors={[Colors.gradient.blue, Colors.gradient.cyan]}
+            colors={[colors.gradient.blue, colors.gradient.cyan]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.gradient}
           >
-            <Text style={[styles.text, styles.primaryText, textStyle]}>{title}</Text>
+            <Text style={[styles.text, { color: colors.text.primary, textShadowColor: colors.gradient.cyan, textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 8 }, textStyle]}>{title}</Text>
           </LinearGradient>
         </AnimatedTouchable>
       </Animated.View>
@@ -101,9 +105,9 @@ export default function CustomButton({
         onPressOut={handlePressOut}
         disabled={disabled}
         activeOpacity={0.8}
-        style={[styles.button, styles.secondaryButton, animatedStyle, style]}
+        style={[styles.button, { backgroundColor: colors.background.secondary, borderWidth: 1, borderColor: `${colors.gradient.blue}30`, justifyContent: 'center', alignItems: 'center', paddingHorizontal: Spacing.lg }, animatedStyle, style]}
       >
-        <Text style={[styles.text, styles.secondaryText, textStyle]}>{title}</Text>
+        <Text style={[styles.text, { color: colors.text.primary }, textStyle]}>{title}</Text>
       </AnimatedTouchable>
     );
   }
@@ -115,12 +119,12 @@ export default function CustomButton({
       onPressOut={handlePressOut}
       disabled={disabled}
       activeOpacity={0.8}
-      style={[styles.button, styles.outlineButton, animatedStyle, style]}
+      style={[styles.button, { backgroundColor: 'transparent', borderWidth: 2, borderColor: colors.gradient.blue, justifyContent: 'center', alignItems: 'center', paddingHorizontal: Spacing.lg }, animatedStyle, style]}
     >
-      <Text style={[styles.text, styles.outlineText, textStyle]}>{title}</Text>
+      <Text style={[styles.text, { color: colors.gradient.blue }, textStyle]}>{title}</Text>
     </AnimatedTouchable>
   );
-}
+};
 
 const styles = StyleSheet.create({
   glowContainer: {
@@ -132,46 +136,47 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
   },
-  primaryButton: {
-    borderWidth: 1,
-    borderColor: `${Colors.gradient.cyan}40`,
-  },
+  // primaryButton: {
+  //   borderWidth: 1,
+  //   borderColor: `${Colors.gradient.cyan}40`,
+  // },
   gradient: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
   },
-  secondaryButton: {
-    backgroundColor: Colors.background.secondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    borderWidth: 1,
-    borderColor: `${Colors.gradient.blue}30`,
-  },
-  outlineButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: Colors.gradient.blue,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-  },
+  // secondaryButton: {
+  //   backgroundColor: Colors.background.secondary,
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   paddingHorizontal: Spacing.lg,
+  //   borderWidth: 1,
+  //   borderColor: `${Colors.gradient.blue}30`,
+  // },
+  // outlineButton: {
+  //   backgroundColor: 'transparent',
+  //   borderWidth: 2,
+  //   borderColor: Colors.gradient.blue,
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   paddingHorizontal: Spacing.lg,
+  // },
   text: {
     fontSize: Typography.fontSize.lg,
     fontFamily: Typography.fontFamily.semiBold,
   },
-  primaryText: {
-    color: Colors.text.primary,
-    textShadowColor: Colors.gradient.cyan,
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
-  },
-  secondaryText: {
-    color: Colors.text.primary,
-  },
-  outlineText: {
-    color: Colors.gradient.blue,
-  },
+  // primaryText: {
+  //   color: Colors.text.primary,
+  //   textShadowColor: Colors.gradient.cyan,
+  //   textShadowOffset: { width: 0, height: 0 },
+  //   textShadowRadius: 8,
+  // },
+  // secondaryText: {
+  //   color: Colors.text.primary,
+  // },
+  // outlineText: {
+  //   color: Colors.gradient.blue,
+  // },
 });
+  export default CustomButton;

@@ -2,7 +2,8 @@ import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
-import { Colors, BorderRadius, Spacing } from '@/constants/theme';
+import { getThemedColors, BorderRadius, Spacing } from '@/constants/theme';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface PlaceholderChartProps {
   width: number;
@@ -11,12 +12,15 @@ interface PlaceholderChartProps {
   gradientColors?: string[];
 }
 
-export default function PlaceholderChart({
+const PlaceholderChart: React.FC<PlaceholderChartProps> = ({
   width,
   height,
   style,
-  gradientColors = [Colors.gradient.blue, Colors.gradient.green],
-}: PlaceholderChartProps) {
+  gradientColors,
+}) => {
+  const { isDark } = useTheme();
+  const colors = getThemedColors(isDark);
+  const usedGradientColors = gradientColors || [colors.gradient.blue, colors.gradient.green];
   const data = [30, 45, 35, 60, 55, 70, 65, 80, 75, 85];
   const max = Math.max(...data);
 
@@ -29,11 +33,11 @@ export default function PlaceholderChart({
   const pathData = `M${points}`;
 
   return (
-    <View style={[styles.container, { width, height }, style]}>
+    <View style={[styles.container, { width, height, backgroundColor: colors.background.secondary }, style]}>
       <Svg width={width - 40} height={height - 40} style={styles.svg}>
         <Path
           d={pathData}
-          stroke={Colors.gradient.blue}
+          stroke={usedGradientColors[0]}
           strokeWidth={3}
           fill="none"
           strokeLinecap="round"
@@ -42,16 +46,18 @@ export default function PlaceholderChart({
       </Svg>
       <View style={styles.grid}>
         {[...Array(5)].map((_, i) => (
-          <View key={i} style={styles.gridLine} />
+          <View key={i} style={[styles.gridLine, { backgroundColor: colors.border.light }]} />
         ))}
       </View>
     </View>
   );
-}
+};
+
+export default PlaceholderChart;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.background.secondary,
+    // backgroundColor: Colors.background.secondary, // ahora dinámico
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     justifyContent: 'center',
@@ -70,7 +76,7 @@ const styles = StyleSheet.create({
   },
   gridLine: {
     height: 1,
-    backgroundColor: Colors.border.light,
+    // backgroundColor: Colors.border.light, // ahora dinámico
     opacity: 0.3,
   },
 });

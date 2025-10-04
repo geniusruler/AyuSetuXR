@@ -21,7 +21,7 @@ import { getResponsivePadding } from '@/constants/dimensions';
 import { validateEmail, validatePassword, FormErrors } from '@/utils/validation';
 import { authService } from '@/services/auth';
 import { supabase } from '@/lib/supabase';
-
+import XRScreen from '@/components/XRScreen';
 export default function LoginScreen() {
   const router = useRouter();
   const { isDark } = useTheme();

@@ -1,14 +1,16 @@
 
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { Camera, useCameraDevices } from 'react-native-vision-camera';
+// import { Camera, useCameraDevices } from 'react-native-vision-camera';
+import { Camera } from 'expo-camera';
 import { FaceMesh } from '@mediapipe/face_mesh';
 import { useCameraPermissions } from '../hooks/useCameraPermissions';
 
 
 export default function CameraFaceMesh({ onLandmarksDetected, width, height }) {
-  const devices = useCameraDevices();
-  const device = devices.front;
+  // const devices = useCameraDevices();
+  // const device = devices.front;
+  const [type, setType] = React.useState(Camera.Constants.Type.front);
   const { permission, requestPermission } = useCameraPermissions();
   const faceMeshRef = useRef(null);
 
@@ -56,11 +58,11 @@ export default function CameraFaceMesh({ onLandmarksDetected, width, height }) {
 
   return (
     <View style={[styles.container, width && height ? { width, height } : null]}>
-      {device ? (
-        <Camera style={[StyleSheet.absoluteFill, width && height ? { width, height } : null]} device={device} isActive />
-      ) : (
-        <ActivityIndicator size="large" color="#fff" />
-      )}
+      <Camera
+        style={[StyleSheet.absoluteFill, width && height ? { width, height } : null]}
+        type={type}
+        ratio="16:9"
+      />
     </View>
   );
 }

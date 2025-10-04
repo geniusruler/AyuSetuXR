@@ -15,3 +15,9 @@ const styles = StyleSheet.create({
   overlay: { position: 'absolute', bottom: 50, left: 20, backgroundColor: 'rgba(0,0,0,0.5)', padding: 12, borderRadius: 10 },
   text: { color: '#fff', fontSize: 16 },
 });
+
+const colorScale = (value) => {
+  if (value < 0.3) return '#00ff00'; // green = focus
+  if (value < 0.6) return '#ffff00'; // yellow = mid
+  return '#ff0000'; // red = stress/fatigue
+};

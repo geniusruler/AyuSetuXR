@@ -41,3 +41,14 @@ const styles = StyleSheet.create({
   overlay: { position: 'absolute', top: 40, left: 20, backgroundColor: 'rgba(0,0,0,0.6)', padding: 10, borderRadius: 8 },
   text: { color: '#fff' },
 });
+
+// CameraFaceMesh.js
+export default function CameraFaceMesh({ onLandmarksDetected }) {
+ 
+  faceMesh.onResults((results) => {
+    if (results.multiFaceLandmarks) {
+      const landmarks = results.multiFaceLandmarks[0];
+      onLandmarksDetected?.(landmarks); // pass up to parent
+    }
+  });
+}

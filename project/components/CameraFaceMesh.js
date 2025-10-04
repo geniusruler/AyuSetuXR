@@ -1,73 +1,57 @@
-
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-// import { Camera, useCameraDevices } from 'react-native-vision-camera';
-import { Camera } from 'expo-camera';
-import { FaceMesh } from '@mediapipe/face_mesh';
-import { useCameraPermissions } from '../hooks/useCameraPermissions';
+import React, { useEffect } from "react";
+import { StyleSheet, View, Text } from "react-native";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import { useFakeFaceMesh } from "../hooks/useFakeFaceMesh";
 
 
-export default function CameraFaceMesh({ onLandmarksDetected, width, height }) {
-  // const devices = useCameraDevices();
-  // const device = devices.front;
-  const [type, setType] = React.useState(Camera.Constants.Type.front);
-  const { permission, requestPermission } = useCameraPermissions();
-  const faceMeshRef = useRef(null);
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#000" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  text: { color: "#fff", fontSize: 16, textAlign: "center" },
+  overlay: {
+    position: "absolute",
+    bottom: 30,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
+});
+
+export default function CameraFaceMesh({ onMetrics }) {
+  const [facing] = React.useState("front");
+  const [permission, requestPermission] = useCameraPermissions();
+  const { landmarks, metrics } = useFakeFaceMesh(150); // actualiza cada 150ms (~6.6fps)
 
   useEffect(() => {
-    if (permission?.status !== 'authorized') {
-      requestPermission();
-      return;
-    }
-    if (!faceMeshRef.current) {
-      const faceMesh = new FaceMesh({
-        locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`,
-      });
-      faceMesh.setOptions({
-        maxNumFaces: 1,
-        refineLandmarks: true,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5,
-      });
-      faceMesh.onResults((results) => {
-        if (results.multiFaceLandmarks) {
-          const landmarks = results.multiFaceLandmarks[0];
-          onLandmarksDetected?.(landmarks);
-        }
-      });
-      faceMeshRef.current = faceMesh;
-    }
-  }, [permission, requestPermission, onLandmarksDetected]);
+    if (!permission?.granted) requestPermission();
+  }, [permission]);
 
-  if (permission?.status === 'not-determined' || permission?.status === 'pending') {
+  useEffect(() => {
+    onMetrics?.(metrics, landmarks);
+  }, [metrics, landmarks]);
+
+  if (!permission?.granted)
     return (
-      <View style={[styles.container, width && height ? { width, height } : null]}>
-        <ActivityIndicator size="large" color="#fff" />
+      <View style={styles.center}>
         <Text style={styles.text}>Solicitando permiso de cámara...</Text>
       </View>
     );
-  }
-
-  if (permission?.status !== 'authorized') {
-    return (
-      <View style={[styles.container, width && height ? { width, height } : null]}>
-        <Text style={styles.text}>Permiso de cámara denegado. Actívalo en la configuración.</Text>
-      </View>
-    );
-  }
 
   return (
-    <View style={[styles.container, width && height ? { width, height } : null]}>
-      <Camera
-        style={[StyleSheet.absoluteFill, width && height ? { width, height } : null]}
-        type={type}
-        ratio="16:9"
-      />
+    <View style={styles.container}>
+      <CameraView style={StyleSheet.absoluteFill} facing={facing} />
+      <View style={styles.overlay}>
+        <Text style={styles.text}>
+          👁 {metrics.gazeDirection.toUpperCase()} | 👀{" "}
+          {metrics.blinkLeft || metrics.blinkRight ? "BLINK" : "OPEN"}
+        </Text>
+        <Text style={styles.text}>
+          ⚡ Atención: {(metrics.attentionScore * 100).toFixed(0)}%
+        </Text>
+        <Text style={styles.text}>
+          😴 Fatiga: {(metrics.fatigueScore * 100).toFixed(0)}%
+        </Text>
+      </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
-  text: { color: '#fff', textAlign: 'center', marginTop: 16 },
-});

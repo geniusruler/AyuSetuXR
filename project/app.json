@@ -9,10 +9,6 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "backgroundColor": "#0A1128",
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.ayusetu"
-    },
     "web": {
       "bundler": "metro",
       "output": "single",
@@ -28,13 +24,7 @@
     },
     "extra": {
       "CLOUDFLARE_WORKER_URL": "https://ayusetuxr.udhav355.workers.dev",
-      "router": {},
-      "eas": {
-        "projectId": "dd439bf7-76c0-49e6-890b-7e8962468583"
-      }
-    },
-    "android": {
-      "package": "com.anonymous.ayusetu"
+      "router": {}
     }
   }
 }

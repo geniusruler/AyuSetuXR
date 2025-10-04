@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { authService } from '@/services/auth';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -152,17 +153,31 @@ export default function RegisterScreen() {
     return Object.values(newErrors).every((error) => !error);
   };
 
+  const [authError, setAuthError] = useState('');
+  
   const handleRegister = async () => {
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
+    setAuthError('');
 
-    setTimeout(() => {
+    try {
+      await authService.signUp({
+        email: formData.email,
+        password: formData.password,
+        fullName: formData.name
+      });
+
+      // Redirigir al usuario a la pantalla principal
+      router.replace('/(tabs)');
+    } catch (error: any) {
+      setAuthError(error?.message || 'Failed to create account');
+      console.error('Registration error:', error);
+    } finally {
       setIsSubmitting(false);
-      router.push('/(tabs)');
-    }, 1500);
+    }
   };
 
   const handleBackToLogin = () => {
@@ -287,6 +302,9 @@ export default function RegisterScreen() {
               </Text>
             </View>
 
+            {authError && (
+              <ErrorMessage message={authError} visible={true} />
+            )}
             <CustomButton
               title={isSubmitting ? "Creating Account..." : "Create Account"}
               onPress={handleRegister}

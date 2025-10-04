@@ -11,6 +11,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { getThemedColors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { getResponsivePadding, SCREEN_WIDTH } from '@/constants/dimensions';
 import { getResponsiveSpacing } from '@/utils/responsive';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function DashboardScreen() {
   const colors = getThemedColors(isDark);
   const responsivePadding = getResponsivePadding();
   const responsiveSpacing = getResponsiveSpacing(Spacing.lg);
+  const { profile, loading, error } = useUserProfile();
 
   const handleStartSession = () => {
     router.push('/calibration');
@@ -33,7 +35,15 @@ export default function DashboardScreen() {
         <View style={styles.header}>
           <View>
             <Text style={[styles.greeting, { color: colors.text.secondary }]}>Welcome back,</Text>
-            <Text style={[styles.username, { color: colors.text.primary, textShadowColor: colors.gradient.cyan }]}>Priya</Text>
+            {loading ? (
+              <Text style={[styles.username, { color: colors.text.primary, textShadowColor: colors.gradient.cyan }]}>Cargando...</Text>
+            ) : error ? (
+              <Text style={[styles.username, { color: colors.text.primary, textShadowColor: colors.gradient.cyan }]}>Error</Text>
+            ) : profile ? (
+              <Text style={[styles.username, { color: colors.text.primary, textShadowColor: colors.gradient.cyan }]}>{profile.full_name || profile.email}</Text>
+            ) : (
+              <Text style={[styles.username, { color: colors.text.primary, textShadowColor: colors.gradient.cyan }]}>No autenticado</Text>
+            )}
           </View>
             {/* streak badge eliminado */}
         </View>

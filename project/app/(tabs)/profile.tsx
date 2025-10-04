@@ -6,10 +6,12 @@ import ThemeToggle from '@/components/ThemeToggle';
 import { useTheme } from '@/contexts/ThemeContext';
 import { getThemedColors, Typography, Spacing, BorderRadius } from '@/constants/theme';
 import { SCREEN_PADDING } from '@/constants/dimensions';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 export default function ProfileScreen() {
   const { isDark } = useTheme();
   const colors = getThemedColors(isDark);
+  const { profile, loading, error } = useUserProfile();
 
   const menuItems = [
     { icon: Settings, label: 'Settings', color: colors.gradient.blue },
@@ -19,7 +21,7 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>...
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text.primary }]}>Profile</Text>
       </View>
@@ -30,13 +32,23 @@ export default function ProfileScreen() {
       >
         <GradientCard style={styles.profileCard}>
           <View style={styles.avatarContainer}>
-            <View style={[styles.avatar, { backgroundColor: colors.background.secondary, borderColor: colors.gradient.blue }]}>
+            <View style={[styles.avatar, { backgroundColor: colors.background.secondary, borderColor: colors.gradient.blue }]}>...
               <User size={40} color={colors.text.primary} />
             </View>
           </View>
-          <Text style={[styles.name, { color: colors.text.primary }]}>Priya Sharma</Text>
-          <Text style={[styles.email, { color: colors.text.secondary }]}>priya.sharma@example.com</Text>
-          <View style={[styles.statsRow, { borderTopColor: colors.border.light }]}>
+          {loading ? (
+            <Text style={[styles.name, { color: colors.text.primary }]}>Cargando...</Text>
+          ) : error ? (
+            <Text style={[styles.name, { color: colors.text.primary }]}>Error al cargar usuario</Text>
+          ) : profile ? (
+            <>
+              <Text style={[styles.name, { color: colors.text.primary }]}>{profile.full_name || 'Sin nombre'}</Text>
+              <Text style={[styles.email, { color: colors.text.secondary }]}>{profile.email}</Text>
+            </>
+          ) : (
+            <Text style={[styles.name, { color: colors.text.primary }]}>No autenticado</Text>
+          )}
+          <View style={[styles.statsRow, { borderTopColor: colors.border.light }]}>...
             <View style={styles.stat}>
               <Text style={[styles.statValue, { color: colors.text.primary }]}>24</Text>
               <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Sessions</Text>

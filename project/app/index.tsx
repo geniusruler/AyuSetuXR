@@ -21,7 +21,7 @@ import { getResponsivePadding } from '@/constants/dimensions';
 import { validateEmail, validatePassword, FormErrors } from '@/utils/validation';
 import { authService } from '@/services/auth';
 import { supabase } from '@/lib/supabase';
-import XRScreen from '@/components/XRScreen';
+
 export default function LoginScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
@@ -184,7 +184,7 @@ export default function LoginScreen() {
               <Brain size={48} color={colors.gradient.blue} strokeWidth={2} />
             </Animated.View>
             <Animated.View style={titleAnimatedStyle}>
-              <Text style={[styles.appName, { color: colors.text.primary }]}>AyuSetu</Text>
+              <Text style={[styles.appName, { color: colors.text.primary }]}>AyuSetuXR</Text>
               <Text style={[styles.tagline, { color: colors.text.secondary }]}>XR Neurofeedback Wellness</Text>
             </Animated.View>
           </View>

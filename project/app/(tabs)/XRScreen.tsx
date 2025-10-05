@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
-import CameraFaceMesh from './CameraFaceMesh';
-import MetricsOverlay from './MetricsOverlay';
-import { computeMetrics } from '../utils/computeMetrics';
+import CameraFaceMesh from '@/components/CameraFaceMesh';
+import MetricsOverlay from '@/components/MetricsOverlay';
+import { computeMetrics } from '@/utils/computeMetrics';
 import { Audio } from 'expo-av';
 import Constants from 'expo-constants';
 
 export default function XRScreen() {
   const [metrics, setMetrics] = useState<any>(null);
 
-  // 🔹 Handle new landmarks from the camera
-  const handleLandmarks = useCallback((landmarks: any) => {
-    const calculated = computeMetrics(landmarks);
+  // 🔹 Handle new metrics/landmarks from the camera component
+  // CameraFaceMesh calls the prop as onMetrics(metrics, landmarks)
+  const handleCameraMetrics = useCallback((cameraMetrics: any, landmarks: any) => {
+    // computeMetrics expects landmarks; fall back to cameraMetrics if landmarks missing
+    const calculated = computeMetrics(landmarks || cameraMetrics);
     setMetrics(calculated);
   }, []);
 
@@ -57,7 +59,7 @@ export default function XRScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraFaceMesh onLandmarksDetected={handleLandmarks} />
+  <CameraFaceMesh onMetrics={handleCameraMetrics} />
       <MetricsOverlay metrics={metrics} />
     </View>
   );

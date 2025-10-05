@@ -18,11 +18,15 @@ export default function DashboardScreen() {
   const { isDark } = useTheme();
   const colors = getThemedColors(isDark);
   const responsivePadding = getResponsivePadding();
-  const responsiveSpacing = getResponsiveSpacing(Spacing.lg);
+  
   const { profile, loading, error } = useUserProfile();
 
   const handleStartSession = () => {
-    router.push('/calibration');
+    // group folders like (tabs) are omitted from the URL path
+    // use the route path without parentheses
+    // Cast to any because the generated route union doesn't include XRScreen
+    // (it's not part of the typed routes). This preserves runtime navigation.
+    router.push('/XRScreen' as any);
   };
 
   return (
@@ -36,13 +40,13 @@ export default function DashboardScreen() {
           <View>
             <Text style={[styles.greeting, { color: colors.text.secondary }]}>Welcome back,</Text>
             {loading ? (
-              <Text style={[styles.username, { color: colors.text.primary, textShadowColor: colors.gradient.cyan }]}>Cargando...</Text>
+              <Text style={[styles.username, { color: colors.text.primary, textShadowColor: colors.gradient.cyan }]}>Loading...</Text>
             ) : error ? (
               <Text style={[styles.username, { color: colors.text.primary, textShadowColor: colors.gradient.cyan }]}>Error</Text>
             ) : profile ? (
               <Text style={[styles.username, { color: colors.text.primary, textShadowColor: colors.gradient.cyan }]}>{profile.full_name || profile.email}</Text>
             ) : (
-              <Text style={[styles.username, { color: colors.text.primary, textShadowColor: colors.gradient.cyan }]}>No autenticado</Text>
+              <Text style={[styles.username, { color: colors.text.primary, textShadowColor: colors.gradient.cyan }]}>No authentication</Text>
             )}
           </View>
             {/* streak badge eliminado */}

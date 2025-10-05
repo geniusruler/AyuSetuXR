@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { BlurView } from 'expo-blur';
 import { X, Eye, Zap, Timer } from 'lucide-react-native';
-import CameraPlaceholder from '@/components/CameraPlaceholder';
+
 import BrainIllustration from '@/components/BrainIllustration';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '@/constants/theme';
 import { SCREEN_WIDTH, SCREEN_HEIGHT, HUD_HEIGHT } from '@/constants/dimensions';
@@ -64,12 +64,7 @@ export default function SessionScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraPlaceholder
-        width={SCREEN_WIDTH}
-        height={SCREEN_HEIGHT}
-        style={styles.cameraBackground}
-        text=""
-      />
+      
 
       <View style={styles.overlay}>
         <TouchableOpacity style={styles.closeButton} onPress={handleEndSession}>

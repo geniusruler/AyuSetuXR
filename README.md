@@ -19,7 +19,7 @@ _Today human health, tomorrow the world health._
 
 ## 🧠 Overview
 
-AyuSetuXR is a revolutionary cognitive health monitoring application that leverages advanced computer vision and machine learning to assess mental wellness through non-invasive facial analysis. By analyzing eye movements, blink patterns, and facial landmarks in real-time, AyuSetu provides comprehensive insights into cognitive performance, attention levels, stress indicators, and fatigue patterns.
+AyuSetuXR is a revolutionary cognitive health monitoring application that leverages advanced computer vision and machine learning to assess mental wellness through non-invasive facial analysis. By analyzing eye movements, blink patterns, and facial landmarks in real-time, AyuSetuXR provides comprehensive insights into cognitive performance, attention levels, stress indicators, and fatigue patterns.
 
 The application bridges the gap between traditional health monitoring and modern extended reality (XR) technologies, offering a seamless, privacy-focused solution for cognitive health assessment.
 
@@ -32,7 +32,7 @@ The application bridges the gap between traditional health monitoring and modern
 - **Stress Detection**: Identify stress indicators through facial micro-expressions
 - **Fatigue Assessment**: Monitor mental fatigue through blink rate and eye movement patterns
 - **AI-Powered Insights**: Real-time analysis using Google Gemini for personalized feedback
-- **Voice Feedback**: Natural language coaching through ElevenLabs text-to-speech
+- **Voice Feedback**: Natural language coaching through ElevenLabs text-to-speech, speech to speech.
 
 ### 📊 Advanced Analytics
 

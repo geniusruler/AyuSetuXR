@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![AyuSetuXR Logo](project/assets/images/icon.png)
+![AyuSetuXR Logo](project/assets/images/logo.jpg)
 
 **Cognitive Health Monitoring through Advanced Computer Vision**
 
@@ -11,7 +11,8 @@ _Today human health, tomorrow the world health._
 [![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
 [![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=TensorFlow&logoColor=white)](https://www.tensorflow.org/)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
+[![Google AI](https://img.shields.io/badge/Google_AI-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-181818?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 
 </div>
@@ -30,6 +31,8 @@ The application bridges the gap between traditional health monitoring and modern
 - **Reaction Time Analysis**: Measure cognitive response speed and processing efficiency
 - **Stress Detection**: Identify stress indicators through facial micro-expressions
 - **Fatigue Assessment**: Monitor mental fatigue through blink rate and eye movement patterns
+- **AI-Powered Insights**: Real-time analysis using Google Gemini for personalized feedback
+- **Voice Feedback**: Natural language coaching through ElevenLabs text-to-speech
 
 ### 📊 Advanced Analytics
 
@@ -66,8 +69,10 @@ The application bridges the gap between traditional health monitoring and modern
 
 **Computer Vision & ML**
 
-- **TensorFlow.js** - Client-side machine learning
 - **MediaPipe Face Mesh** - 468-point facial landmark detection
+- **Cloudflare Workers** - Serverless AI processing with Gemini
+- **Google Gemini AI** - Advanced cognitive analysis and insights
+- **ElevenLabs** - Real-time voice feedback generation
 - **Custom Algorithms** - Proprietary cognitive metric computation
 
 **Backend & Data**
@@ -86,12 +91,12 @@ The application bridges the gap between traditional health monitoring and modern
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Client App    │    │   ML Pipeline   │    │    Backend      │
+│   Client App    │    │  Edge AI Layer  │    │    Backend      │
 │                 │    │                 │    │                 │
-│ • React Native  │───▶│ • TensorFlow.js │───▶│ • Supabase      │
-│ • Camera Input  │    │ • MediaPipe     │    │ • PostgreSQL    │
-│ • UI Components │    │ • Face Mesh     │    │ • Authentication│
-│ • State Mgmt    │    │ • Metrics Calc  │    │ • Data Storage  │
+│ • React Native  │───▶│ • Cloudflare    │───▶│ • Supabase      │
+│ • Camera Input  │    │ • Gemini AI     │    │ • PostgreSQL    │
+│ • MediaPipe     │    │ • ElevenLabs    │    │ • Authentication│
+│ • Metrics Calc  │    │ • Voice AI      │    │ • Data Storage  │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
@@ -133,6 +138,8 @@ Before running AyuSetuXR, ensure you have the following installed:
    EXPO_PUBLIC_SUPABASE_URL=your_supabase_project_url
    EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    CLOUDFLARE_WORKER_URL=your_cloudflare_worker_url
+   GEMINI_API_KEY=your_google_gemini_api_key
+   ELEVENLABS_API_KEY=your_elevenlabs_api_key
    ```
 
 4. **Set up the database**
@@ -207,6 +214,35 @@ npm run build:web
 | **Fatigue Level**    | Mental tiredness assessment     | 0-100     | Lower values indicate less fatigue       |
 | **Engagement Index** | Overall cognitive engagement    | 0-100     | Higher values indicate better engagement |
 
+## ☁️ Cloudflare Integration
+
+### Edge AI Architecture
+
+AyuSetuXR utilizes Cloudflare Workers for serverless AI processing, providing:
+
+- **Low Latency**: Edge computing for sub-100ms response times
+- **Global Scale**: Distributed across 200+ data centers worldwide
+- **Cost Efficiency**: Pay-per-request pricing model
+- **Real-time Processing**: Streaming audio responses
+
+### AI Pipeline Flow
+
+```
+Device Metrics → Cloudflare Worker → Google Gemini → ElevenLabs → Audio Stream
+     ↓                ↓                    ↓              ↓           ↓
+Face Analysis    Edge Processing    AI Analysis    Voice Synthesis  Audio Playback
+```
+
+### Worker Configuration
+
+```javascript
+// Cloudflare Worker endpoints
+POST /ai-feedback
+- Accepts: cognitive metrics JSON
+- Returns: MP3 audio stream
+- Processing: Gemini analysis + ElevenLabs TTS
+```
+
 ## 🔧 Configuration
 
 ### Camera Settings
@@ -217,14 +253,15 @@ The application automatically configures optimal camera settings:
 - **Frame Rate**: 30 FPS for smooth detection
 - **Format**: YUV420 for efficient processing
 
-### ML Model Configuration
+### AI Processing Configuration
 
-Face mesh detection is configured for:
+The application leverages edge AI for enhanced performance:
 
-- **Maximum Faces**: 1 (optimized for single user)
-- **Landmark Points**: 468 high-precision points
-- **Refinement**: Enabled for iris and lip landmarks
-- **Real-time Processing**: Optimized for mobile devices
+- **Face Detection**: MediaPipe with 468 high-precision facial landmarks
+- **Edge Processing**: Cloudflare Workers for low-latency AI inference
+- **Gemini Integration**: Advanced cognitive analysis with Google's AI
+- **Voice Synthesis**: ElevenLabs for natural multilingual feedback
+- **Real-time Processing**: Optimized for mobile devices with 10-second intervals
 
 ## 🗄️ Database Schema
 
@@ -358,16 +395,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### Frequently Asked Questions
 
 **Q: Is my facial data stored or transmitted?**
-A: No. All face analysis is performed locally on your device. Only anonymized metrics are stored in our secure database.
+A: No. All face analysis is performed locally on your device. Only anonymized metrics are sent to Cloudflare Workers for AI analysis. No facial images are ever stored or transmitted.
 
 **Q: What devices are supported?**
 A: AyuSetuXR supports iOS 12+, Android 8.0+, and modern web browsers with camera access.
 
+**Q: How does the AI feedback work?**
+A: Cognitive metrics are processed by Google Gemini AI through Cloudflare Workers, generating personalized insights that are converted to natural speech using ElevenLabs in your preferred language.
+
 **Q: How accurate are the cognitive assessments?**
-A: Our algorithms are based on peer-reviewed research and provide reliable indicators. However, this is not a medical diagnostic tool.
+A: Our algorithms combine traditional computer vision with advanced AI analysis. While highly reliable for wellness monitoring, this is not a medical diagnostic tool.
 
 **Q: Can I use AyuSetuXR offline?**
-A: Core assessment functionality works offline. Data synchronization requires internet connectivity.
+A: Face detection and basic metrics work offline. AI feedback and voice coaching require internet connectivity for Cloudflare Workers access.
 
 ---
 

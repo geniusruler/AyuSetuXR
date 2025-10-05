@@ -1,4 +1,4 @@
-# AyuSetuXR - The Bridge Between Human Health and Extended Reality
+# AyuSetuXR - The Bridge Between Life and Extended Reality
 
 <div align="center">
 

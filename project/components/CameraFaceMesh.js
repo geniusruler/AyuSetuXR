@@ -1,13 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import { CameraView, useCameraPermissions } from "expo-camera";
-import { useFakeFaceMesh } from "../hooks/useFakeFaceMesh";
-
+import { Camera } from "expo-camera";
+import { FaceMesh } from "@mediapipe/face_mesh";
+import { CameraType } from "expo-camera";
+import { computeMetrics } from "@/utils/computeMetrics";
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  text: { color: "#fff", fontSize: 16, textAlign: "center" },
   overlay: {
     position: "absolute",
     bottom: 30,
@@ -15,42 +14,108 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: "center",
   },
+  text: { color: "#fff", fontSize: 16, textAlign: "center" },
 });
 
 export default function CameraFaceMesh({ onMetrics }) {
-  const [facing] = React.useState("front");
-  const [permission, requestPermission] = useCameraPermissions();
-  const { landmarks, metrics } = useFakeFaceMesh(150); // actualiza cada 150ms (~6.6fps)
+  const cameraRef = useRef(null);
+  const [permission, requestPermission] = Camera.useCameraPermissions();
+  const [statusText, setStatusText] = useState("Initializing camera...");
 
+  // 🔹 Request camera permission
   useEffect(() => {
-    if (!permission?.granted) requestPermission();
+    (async () => {
+      if (!permission?.granted) {
+        const { status } = await requestPermission();
+        if (status !== "granted") {
+          alert("Camera permission is required for face tracking.");
+          return;
+        }
+      }
+      setStatusText("Camera ready. Detecting face...");
+    })();
   }, [permission]);
 
   useEffect(() => {
-    onMetrics?.(metrics, landmarks);
-  }, [metrics, landmarks]);
+    let faceMesh;
 
-  if (!permission?.granted)
+    const initFaceMesh = async () => {
+      faceMesh = new FaceMesh({
+        locateFile: (file) =>
+          `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+      });
+
+      faceMesh.setOptions({
+        maxNumFaces: 1,
+        refineLandmarks: true,
+        minDetectionConfidence: 0.6,
+        minTrackingConfidence: 0.6,
+      });
+
+      faceMesh.onResults((results) => {
+        if (
+          results.multiFaceLandmarks &&
+          results.multiFaceLandmarks.length > 0
+        ) {
+          const landmarks = results.multiFaceLandmarks[0];
+          const metrics = computeMetrics(landmarks);
+
+          if (metrics && onMetrics) {
+            onMetrics(metrics, landmarks);
+          }
+
+          setStatusText(
+            `🧠 Tracking...  Attention ${(metrics?.attentionScore * 100).toFixed(
+              0
+            )}%`
+          );
+        } else {
+          setStatusText("No face detected. Adjust lighting or position.");
+        }
+      });
+    };
+
+    initFaceMesh();
+
+    const processCameraFrame = async () => {
+      if (!cameraRef.current || !faceMesh) {
+        requestAnimationFrame(processCameraFrame);
+        return;
+      }
+      try {
+        const photo = await cameraRef.current.takePictureAsync({
+          skipProcessing: true,
+        });
+        const response = await fetch(photo.uri);
+        const blob = await response.blob();
+        const imageBitmap = await createImageBitmap(blob);
+        await faceMesh.send({ image: imageBitmap });
+      } catch (err) {
+        console.warn("Error processing frame:", err);
+      }
+      requestAnimationFrame(processCameraFrame);
+    };
+
+    processCameraFrame();
+
+    return () => {
+      if (faceMesh) faceMesh.close();
+    };
+  }, [onMetrics]);
+
+  if (!permission?.granted) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.text}>Solicitando permiso de cámara...</Text>
+      <View style={styles.container}>
+        <Text style={styles.text}>Requesting camera permission...</Text>
       </View>
     );
+  }
 
   return (
     <View style={styles.container}>
-      <CameraView style={StyleSheet.absoluteFill} facing={facing} />
+      <Camera ref={cameraRef} style={StyleSheet.absoluteFill} type={CameraType.front} />
       <View style={styles.overlay}>
-        <Text style={styles.text}>
-          👁 {metrics.gazeDirection.toUpperCase()} | 👀{" "}
-          {metrics.blinkLeft || metrics.blinkRight ? "BLINK" : "OPEN"}
-        </Text>
-        <Text style={styles.text}>
-          ⚡ Atención: {(metrics.attentionScore * 100).toFixed(0)}%
-        </Text>
-        <Text style={styles.text}>
-          😴 Fatiga: {(metrics.fatigueScore * 100).toFixed(0)}%
-        </Text>
+        <Text style={styles.text}>{statusText}</Text>
       </View>
     </View>
   );

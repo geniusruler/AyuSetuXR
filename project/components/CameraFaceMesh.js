@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Platform } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import * as tf from "@tensorflow/tfjs";
-import "@tensorflow/tfjs-react-native";
-import * as FaceMesh from "@tensorflow-models/facemesh";
-import { cameraWithTensors } from "@tensorflow/tfjs-react-native";
 import { computeMetrics } from "@/utils/computeMetrics";
 
-const TensorCamera = cameraWithTensors(CameraView);
+// Lazy TensorFlow imports (for EAS build compatibility)
+let tf, FaceMesh, cameraWithTensors, TensorCamera;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
@@ -25,23 +22,44 @@ export default function CameraFaceMesh({ onMetrics }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [statusText, setStatusText] = useState("Initializing...");
   const [model, setModel] = useState(null);
+  const [isTFReady, setIsTFReady] = useState(false);
 
-  // Load TensorFlow + FaceMesh
+  // Load TensorFlow and FaceMesh dynamically (safe for builds)
   useEffect(() => {
-    const load = async () => {
-      await tf.ready();
-      const loadedModel = await FaceMesh.load({
-        maxFaces: 1,
-        refineLandmarks: true,
-      });
-      setModel(loadedModel);
-      setStatusText("Model ready! Align your face.");
+    const loadTF = async () => {
+      try {
+        // Prevent TensorFlow loading in web fallback
+        if (Platform.OS === "web") {
+          setStatusText("⚠️ TensorFlow not supported on Web — using demo mode.");
+          return;
+        }
+
+        tf = await import("@tensorflow/tfjs");
+        await import("@tensorflow/tfjs-react-native");
+        FaceMesh = await import("@tensorflow-models/facemesh");
+        cameraWithTensors = (await import("@tensorflow/tfjs-react-native")).cameraWithTensors;
+
+        await tf.ready();
+        const loadedModel = await FaceMesh.load({ maxFaces: 1, refineLandmarks: true });
+        setModel(loadedModel);
+        setIsTFReady(true);
+        setStatusText("✅ Model loaded. Align your face.");
+      } catch (err) {
+        console.warn("TensorFlow load error:", err);
+        setStatusText("⚠️ Error loading ML model. Running in fallback mode.");
+      }
     };
-    load();
+    loadTF();
   }, []);
 
+  // Request camera permissions
+  useEffect(() => {
+    if (!permission?.granted) {
+      requestPermission();
+    }
+  }, [permission]);
+
   if (!permission?.granted) {
-    requestPermission();
     return (
       <View style={styles.container}>
         <Text style={styles.text}>Requesting camera permission...</Text>
@@ -49,26 +67,46 @@ export default function CameraFaceMesh({ onMetrics }) {
     );
   }
 
-  const handleCameraStream = (images, updateCameraPreview) => {
+  // If TensorFlow not ready, show fallback message
+  if (!isTFReady || !model) {
+    return (
+      <View style={styles.container}>
+        <CameraView style={StyleSheet.absoluteFill} facing="front" />
+        <View style={styles.overlay}>
+          <Text style={styles.text}>{statusText}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  // Initialize TensorCamera
+  if (!TensorCamera && cameraWithTensors) {
+    TensorCamera = cameraWithTensors(CameraView);
+  }
+
+  const handleCameraStream = (images) => {
     const loop = async () => {
       const nextImageTensor = images.next().value;
       if (model && nextImageTensor) {
-        const predictions = await model.estimateFaces({
-          input: nextImageTensor,
-        });
+        try {
+          const predictions = await model.estimateFaces({ input: nextImageTensor });
 
-        if (predictions.length > 0) {
-          const landmarks = predictions[0].scaledMesh;
-          const metrics = computeMetrics(landmarks);
-          onMetrics?.(metrics, landmarks);
-          setStatusText(
-            `👁 Tracking | Attention: ${(metrics?.attentionScore * 100 || 0).toFixed(0)}%`
-          );
-        } else {
-          setStatusText("No face detected. Adjust lighting or distance.");
+          if (predictions.length > 0) {
+            const landmarks = predictions[0].scaledMesh;
+            const metrics = computeMetrics(landmarks);
+
+            onMetrics?.(metrics, landmarks);
+            setStatusText(
+              `👁 Tracking | Attention: ${(metrics?.attentionScore * 100 || 0).toFixed(0)}%`
+            );
+          } else {
+            setStatusText("No face detected. Adjust lighting or distance.");
+          }
+
+          tf.dispose(nextImageTensor);
+        } catch (err) {
+          console.warn("Frame processing error:", err);
         }
-
-        tf.dispose(nextImageTensor);
       }
       requestAnimationFrame(loop);
     };

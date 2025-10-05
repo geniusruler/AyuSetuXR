@@ -24,7 +24,19 @@
     },
     "extra": {
       "CLOUDFLARE_WORKER_URL": "https://ayusetuxr.udhav355.workers.dev",
-      "router": {}
+      "router": {},
+      "eas": {
+        "projectId": "665b2a19-b0b7-4651-9c1f-23613e983839"
+      }
+    },
+    "android": {
+      "package": "com.anonymous.ayusetu"
+    },
+    "ios": {
+      "bundleIdentifier": "com.anonymous.ayusetu",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     }
   }
 }

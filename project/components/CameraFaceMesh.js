@@ -1,8 +1,8 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import { Camera } from "expo-camera";
-import { CameraType } from "expo-camera";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import { computeMetrics } from "@/utils/computeMetrics";
+
 
 // Import MediaPipe dynamically (to avoid Expo Go issues)
 let FaceMeshModule;
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
 
 export default function CameraFaceMesh({ onMetrics }) {
   const cameraRef = useRef(null);
-  const [permission, requestPermission] = Camera.useCameraPermissions();
+  const [permission, requestPermission] = useCameraPermissions();
   const [statusText, setStatusText] = useState("🧠 Initializing face tracking...");
 
   // Request camera permission

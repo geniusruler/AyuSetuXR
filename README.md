@@ -4,7 +4,7 @@
 
 ![AyuSetuXR Logo](project/assets/images/logoWB.png)
 
-**Cognitive Health Monitoring through Advanced Computer Vision**
+
 
 _Today human health, tomorrow the world health._
 
@@ -19,9 +19,12 @@ _Today human health, tomorrow the world health._
 
 ## 🧠 Overview
 
-AyuSetuXR is a revolutionary cognitive health monitoring application that leverages advanced computer vision and machine learning to assess mental wellness through non-invasive facial analysis. By analyzing eye movements, blink patterns, and facial landmarks in real-time, AyuSetuXR provides comprehensive insights into cognitive performance, attention levels, stress indicators, and fatigue patterns.
+In today’s fast-paced hybrid world, humans are constantly multitasking across digital environments — leading to rising fatigue, attention drift, and cognitive overload. Yet, there’s no accessible tool that can sense how engaged or exhausted someone truly is in real time.
+Whether it’s a student zoning out during study sessions, a driver losing focus on the road, or a professional burning out in front of a screen, the lack of real-time cognitive awareness limits both safety and performance. Current wearable solutions (like EEG headsets or smart glasses) are expensive, invasive, or impractical for daily use — leaving a massive gap between human capability and technology-driven awareness.
 
-The application bridges the gap between traditional health monitoring and modern extended reality (XR) technologies, offering a seamless, privacy-focused solution for cognitive health assessment.
+AyuSetuXR bridges the gap between human cognition and digital feedback — an AI-driven, cross-platform augmentation system that analyzes facial landmarks, eye movements, and iris behavior through MediaPipe FaceMesh, converts them into metrics like attention, fatigue, and focus stability, and feeds them into Google Gemini AI for natural-language reasoning.
+The insights are then transformed into real-time multilingual voice feedback via ElevenLabs, creating a closed-loop system where your device talks back — guiding you to stay focused, relax, or rebalance your attention.
+By running on React Native with Cloudflare-based edge processing, AyuSetuXR eliminates the need for wearables and brings human augmentation through camera-based cognitive tracking to every phone and XR interface — accessible, multilingual, and privacy-preserving.
 
 ## ✨ Key Features
 

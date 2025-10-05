@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![AyuSetuXR Logo](project/assets/images/logo.jpg)
+![AyuSetuXR Logo](project/assets/images/logoWB.png)
 
 **Cognitive Health Monitoring through Advanced Computer Vision**
 

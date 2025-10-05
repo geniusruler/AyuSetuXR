@@ -13,7 +13,7 @@ export default function StartScreen() {
   const colors = getThemedColors(isDark);
 
   const handleStartSession = () => {
-    router.push('/calibration');
+    router.push('/xr');
   };
 
   return (

@@ -26,7 +26,7 @@ export default function DashboardScreen() {
     // use the route path without parentheses
     // Cast to any because the generated route union doesn't include XRScreen
     // (it's not part of the typed routes). This preserves runtime navigation.
-    router.push('/XRScreen' as any);
+    router.push('/xr' );
   };
 
   return (

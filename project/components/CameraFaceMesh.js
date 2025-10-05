@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, Text } from "react-native";
-import { CameraView, useCameraPermissions } from "expo-camera";
+import { StyleSheet, View, Text, Button } from "react-native";
+import { Camera, CameraType, useCameraPermissions } from "expo-camera";
 import { computeMetrics } from "@/utils/computeMetrics";
 
-
-// Import MediaPipe dynamically (to avoid Expo Go issues)
+// Load MediaPipe safely
 let FaceMeshModule;
 try {
   FaceMeshModule = require("@mediapipe/face_mesh");
 } catch (err) {
-  console.warn("Mediapipe module not found:", err);
+  console.warn("⚠️ Mediapipe not found:", err);
 }
 
 const styles = StyleSheet.create({
@@ -29,22 +28,22 @@ export default function CameraFaceMesh({ onMetrics }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [statusText, setStatusText] = useState("🧠 Initializing face tracking...");
 
-  // Request camera permission
+  // 1️⃣ Handle camera permissions
   useEffect(() => {
     (async () => {
       if (!permission?.granted) {
         const { status } = await requestPermission();
         if (status !== "granted") {
           alert("Camera permission is required for face tracking.");
-          return;
         }
       }
     })();
   }, [permission]);
 
+  // 2️⃣ FaceMesh setup
   useEffect(() => {
     if (!FaceMeshModule) {
-      setStatusText("⚠️ Mediapipe not found. Please reinstall dependencies.");
+      setStatusText("⚠️ Mediapipe not found. Reinstall dependencies.");
       return;
     }
 
@@ -68,7 +67,7 @@ export default function CameraFaceMesh({ onMetrics }) {
 
         onMetrics?.(metrics, landmarks);
         setStatusText(
-          `👁 Tracking | Focus ${(metrics?.attentionScore * 100 || 0).toFixed(0)}%`
+          `👁 Focus ${(metrics?.attentionScore * 100 || 0).toFixed(0)}%`
         );
       } else {
         setStatusText("😶 No face detected — adjust lighting or distance.");
@@ -85,10 +84,12 @@ export default function CameraFaceMesh({ onMetrics }) {
         const photo = await cameraRef.current.takePictureAsync({
           skipProcessing: true,
         });
-        const response = await fetch(photo.uri);
-        const blob = await response.blob();
-        const imageBitmap = await createImageBitmap(blob);
-        await faceMesh.send({ image: imageBitmap });
+        if (photo?.uri) {
+          const response = await fetch(photo.uri);
+          const blob = await response.blob();
+          const imageBitmap = await createImageBitmap(blob);
+          await faceMesh.send({ image: imageBitmap });
+        }
       } catch (err) {
         console.warn("Frame processing error:", err);
       }
@@ -103,17 +104,33 @@ export default function CameraFaceMesh({ onMetrics }) {
     };
   }, [onMetrics]);
 
-  if (!permission?.granted) {
+  // 3️⃣ Handle permission UI states
+  if (!permission) {
     return (
       <View style={styles.container}>
-        <Text style={styles.text}>Requesting camera permission...</Text>
+        <Text style={styles.text}>Loading camera permission...</Text>
       </View>
     );
   }
 
+  if (!permission.granted) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.text}>We need your camera permission</Text>
+        <Button onPress={requestPermission} title="Grant Permission" />
+      </View>
+    );
+  }
+
+  // 4️⃣ Render the camera and overlay
   return (
     <View style={styles.container}>
-      <Camera ref={cameraRef} style={StyleSheet.absoluteFill} type={CameraType.front} />
+      <Camera
+        ref={cameraRef}
+        style={StyleSheet.absoluteFill}
+        type={CameraType.front}
+        ratio="16:9"
+      />
       <View style={styles.overlay}>
         <Text style={styles.text}>{statusText}</Text>
       </View>

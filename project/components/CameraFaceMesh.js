@@ -1,15 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, Text, Button } from "react-native";
+import { StyleSheet, View, Text, Button, Platform } from "react-native";
 import { Camera, CameraType, useCameraPermissions } from "expo-camera";
+import * as FaceDetector from "expo-face-detector";
 import { computeMetrics } from "@/utils/computeMetrics";
-
-// Load MediaPipe safely
-let FaceMeshModule;
-try {
-  FaceMeshModule = require("@mediapipe/face_mesh");
-} catch (err) {
-  console.warn("⚠️ Mediapipe not found:", err);
-}
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
@@ -27,8 +20,9 @@ export default function CameraFaceMesh({ onMetrics }) {
   const cameraRef = useRef(null);
   const [permission, requestPermission] = useCameraPermissions();
   const [statusText, setStatusText] = useState("🧠 Initializing face tracking...");
+  const [isReady, setIsReady] = useState(false);
 
-  // 1️⃣ Handle camera permissions
+  // 1️⃣ Handle Camera Permissions
   useEffect(() => {
     (async () => {
       if (!permission?.granted) {
@@ -40,71 +34,27 @@ export default function CameraFaceMesh({ onMetrics }) {
     })();
   }, [permission]);
 
-  // 2️⃣ FaceMesh setup
-  useEffect(() => {
-    if (!FaceMeshModule) {
-      setStatusText("⚠️ Mediapipe not found. Reinstall dependencies.");
-      return;
+  // 2️⃣ On Face Detection Results
+  const handleFacesDetected = ({ faces }) => {
+    if (faces.length > 0) {
+      const face = faces[0];
+
+      // You can compute metrics here using landmarks (if needed)
+      const metrics = computeMetrics(face); // make sure computeMetrics handles expo-face-detector format
+      onMetrics?.(metrics, face);
+
+      setStatusText(`👁 Face detected (yaw: ${face.yawAngle?.toFixed(1)}°)`);
+    } else {
+      setStatusText("😶 No face detected — adjust lighting or distance.");
     }
+  };
 
-    const { FaceMesh } = FaceMeshModule;
-    const faceMesh = new FaceMesh({
-      locateFile: (file) =>
-        `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
-    });
+  // 3️⃣ Camera Ready
+  const handleCameraReady = () => {
+    setIsReady(true);
+  };
 
-    faceMesh.setOptions({
-      maxNumFaces: 1,
-      refineLandmarks: true,
-      minDetectionConfidence: 0.6,
-      minTrackingConfidence: 0.6,
-    });
-
-    faceMesh.onResults((results) => {
-      if (results.multiFaceLandmarks?.length > 0) {
-        const landmarks = results.multiFaceLandmarks[0];
-        const metrics = computeMetrics(landmarks);
-
-        onMetrics?.(metrics, landmarks);
-        setStatusText(
-          `👁 Focus ${(metrics?.attentionScore * 100 || 0).toFixed(0)}%`
-        );
-      } else {
-        setStatusText("😶 No face detected — adjust lighting or distance.");
-      }
-    });
-
-    const processFrames = async () => {
-      if (!cameraRef.current) {
-        requestAnimationFrame(processFrames);
-        return;
-      }
-
-      try {
-        const photo = await cameraRef.current.takePictureAsync({
-          skipProcessing: true,
-        });
-        if (photo?.uri) {
-          const response = await fetch(photo.uri);
-          const blob = await response.blob();
-          const imageBitmap = await createImageBitmap(blob);
-          await faceMesh.send({ image: imageBitmap });
-        }
-      } catch (err) {
-        console.warn("Frame processing error:", err);
-      }
-
-      requestAnimationFrame(processFrames);
-    };
-
-    processFrames();
-
-    return () => {
-      faceMesh.close();
-    };
-  }, [onMetrics]);
-
-  // 3️⃣ Handle permission UI states
+  // 4️⃣ Handle Permission UI States
   if (!permission) {
     return (
       <View style={styles.container}>
@@ -122,15 +72,29 @@ export default function CameraFaceMesh({ onMetrics }) {
     );
   }
 
-  // 4️⃣ Render the camera and overlay
+  // 5️⃣ Render Camera + Overlay
   return (
     <View style={styles.container}>
-      <Camera
-        ref={cameraRef}
-        style={StyleSheet.absoluteFill}
-        type={CameraType.front}
-        ratio="16:9"
-      />
+      {Platform.OS === "web" ? (
+        <Text style={styles.text}>🌐 Face detection not supported on web yet.</Text>
+      ) : (
+        <Camera
+          ref={cameraRef}
+          style={StyleSheet.absoluteFill}
+          type={CameraType.front}
+          ratio="16:9"
+          onCameraReady={handleCameraReady}
+          onFacesDetected={isReady ? handleFacesDetected : undefined}
+          faceDetectorSettings={{
+            mode: FaceDetector.FaceDetectorMode.fast,
+            detectLandmarks: FaceDetector.FaceDetectorLandmarks.all,
+            runClassifications: FaceDetector.FaceDetectorClassifications.all,
+            minDetectionInterval: 100,
+            tracking: true,
+          }}
+        />
+      )}
+
       <View style={styles.overlay}>
         <Text style={styles.text}>{statusText}</Text>
       </View>
